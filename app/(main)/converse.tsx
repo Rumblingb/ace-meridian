@@ -7,7 +7,17 @@ import {
   ActivityIndicator,
   ScrollView,
   Pressable,
+  Platform,
 } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withSequence,
+  withTiming,
+  withDelay,
+  Easing,
+} from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { Audio } from "expo-av";
@@ -64,6 +74,158 @@ async function fetchWithRetry(
   throw lastError ?? new Error("All retry attempts failed");
 }
 
+// ─── Pulse ring component ─────────────────────────────────────────────────────
+
+function PulseRing({ delay = 0, active }: { delay?: number; active: boolean }) {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    if (active) {
+      scale.value = withDelay(
+        delay,
+        withRepeat(
+          withSequence(
+            withTiming(1.15, { duration: 750, easing: Easing.out(Easing.ease) }),
+            withTiming(1.0, { duration: 750, easing: Easing.in(Easing.ease) })
+          ),
+          -1,
+          false
+        )
+      );
+      opacity.value = withDelay(
+        delay,
+        withRepeat(
+          withSequence(
+            withTiming(1.0, { duration: 750 }),
+            withTiming(0.3, { duration: 750 })
+          ),
+          -1,
+          false
+        )
+      );
+    } else {
+      scale.value = withTiming(1, { duration: 200 });
+      opacity.value = withTiming(0, { duration: 200 });
+    }
+  }, [active]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  return <Animated.View style={[styles.pulseRing, animStyle]} />;
+}
+
+// ─── Loading pulse on orb ─────────────────────────────────────────────────────
+
+function useOrbPulse(isProcessing: boolean) {
+  const scale = useSharedValue(1);
+
+  useEffect(() => {
+    if (isProcessing) {
+      scale.value = withRepeat(
+        withSequence(
+          withTiming(1.06, { duration: 500 }),
+          withTiming(0.96, { duration: 500 })
+        ),
+        -1,
+        false
+      );
+    } else {
+      scale.value = withTiming(1, { duration: 200 });
+    }
+  }, [isProcessing]);
+
+  return useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+}
+
+// ─── Journey strip slide-in ───────────────────────────────────────────────────
+
+function JourneyStrip({
+  label,
+  delayed,
+  cancelled,
+  onPress,
+}: {
+  label: string;
+  delayed: boolean;
+  cancelled: boolean;
+  onPress: () => void;
+}) {
+  const translateY = useSharedValue(20);
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    translateY.value = withTiming(0, { duration: 340, easing: Easing.out(Easing.ease) });
+    opacity.value = withTiming(1, { duration: 340 });
+  }, []);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View style={animStyle}>
+      <Pressable
+        style={[
+          styles.journeyStrip,
+          delayed && styles.journeyStripDelayed,
+          cancelled && styles.journeyStripCancelled,
+        ]}
+        onPress={onPress}
+      >
+        <Text style={styles.journeyStripText}>{label}</Text>
+        <Text style={styles.journeyStripChevron}>›</Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+// ─── Staggered confirm card ────────────────────────────────────────────────────
+
+function FadeInView({ children, delay }: { children: React.ReactNode; delay: number }) {
+  const opacity = useSharedValue(0);
+
+  useEffect(() => {
+    opacity.value = withDelay(delay, withTiming(1, { duration: 260 }));
+  }, []);
+
+  const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return <Animated.View style={animStyle}>{children}</Animated.View>;
+}
+
+// ─── Inline error state ────────────────────────────────────────────────────────
+
+function InlineError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <View style={styles.inlineError}>
+      <Text style={styles.inlineErrorText}>Ace is having trouble connecting. Try again?</Text>
+      <TouchableOpacity style={styles.retryBtn} onPress={onRetry}>
+        <Text style={styles.retryBtnText}>Retry</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+// ─── Offline banner ────────────────────────────────────────────────────────────
+
+function OfflineBanner({ lastJourneyLabel }: { lastJourneyLabel: string | null }) {
+  return (
+    <View style={styles.offlineBanner}>
+      <Text style={styles.offlineText}>
+        {"You're offline. Your confirmed journeys are still available."}
+      </Text>
+      {lastJourneyLabel ? (
+        <Text style={styles.offlineJourney}>{lastJourneyLabel}</Text>
+      ) : null}
+    </View>
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ConverseScreen() {
@@ -76,10 +238,16 @@ export default function ConverseScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [pendingIntent, setPendingIntent] = useState<IntentResult | null>(null);
   const [transcript, setTranscript] = useState("");
+  const [hasError, setHasError] = useState(false);
+  const [lastUserText, setLastUserText] = useState("");
+  const [isOffline, setIsOffline] = useState(false);
+  const [lastJourneyLabel, setLastJourneyLabel] = useState<string | null>(null);
 
   const recordingRef = useRef<Audio.Recording | null>(null);
   const voiceListenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollRef = useRef<ScrollView>(null);
+
+  const orbPulseStyle = useOrbPulse(isProcessing);
 
   // ─── Permissions ────────────────────────────────────────────────────────────
 
@@ -125,8 +293,6 @@ export default function ConverseScreen() {
 
       if (!uri) return "";
 
-      // In production this calls a Whisper/STT endpoint. Here we mock
-      // with a placeholder so the UI flow compiles and runs.
       const sttEndpoint = process.env.EXPO_PUBLIC_STT_ENDPOINT;
       if (!sttEndpoint) {
         console.warn("[converse] No STT endpoint configured — transcript unavailable");
@@ -154,6 +320,8 @@ export default function ConverseScreen() {
     async (userText: string) => {
       if (!userText) return;
 
+      setHasError(false);
+      setLastUserText(userText);
       setMessages((prev) => [...prev, { role: "user", text: userText }]);
       setIsProcessing(true);
 
@@ -169,7 +337,6 @@ export default function ConverseScreen() {
 
         const intent: IntentResult = await response.json();
 
-        // Build Ace's confirmation message
         const confirmMsg = intent.price
           ? `I found ${intent.summary}. The price is ${intent.price}. Shall I go ahead and book this for you?`
           : `Here's what I found: ${intent.summary}. Want me to confirm this?`;
@@ -178,14 +345,11 @@ export default function ConverseScreen() {
         setPendingIntent(intent);
         setPhase(2);
 
-        // Speak confirmation then auto-listen for voice reply
         await speak(confirmMsg);
         startVoiceConfirmListen();
       } catch (err) {
         console.warn("[converse] Intent fetch failed after retries:", err);
-        const errMsg = "I had trouble reaching the server. Please try again.";
-        setMessages((prev) => [...prev, { role: "ace", text: errMsg }]);
-        await speak(errMsg);
+        setHasError(true);
       } finally {
         setIsProcessing(false);
       }
@@ -193,15 +357,20 @@ export default function ConverseScreen() {
     [startListening]
   );
 
+  const handleRetry = useCallback(() => {
+    if (lastUserText) {
+      void handleUserUtterance(lastUserText);
+    }
+  }, [lastUserText, handleUserUtterance]);
+
   // ─── Phase 2: voice confirmation listen ─────────────────────────────────────
 
   const startVoiceConfirmListen = useCallback(async () => {
     await startListening();
 
-    // Auto-stop after 8 seconds
     voiceListenTimerRef.current = setTimeout(async () => {
       const text = await stopListeningAndProcess();
-      if (!text) return; // No transcription — button fallback still active
+      if (!text) return;
 
       const lower = text.toLowerCase();
       const confirmed = CONFIRMATION_WORDS.some((w) => lower.includes(w));
@@ -212,7 +381,6 @@ export default function ConverseScreen() {
       } else if (cancelled) {
         handleCancel();
       }
-      // If neither, do nothing — wait for tap
     }, VOICE_LISTEN_DURATION_MS);
   }, [startListening, stopListeningAndProcess]);
 
@@ -228,7 +396,6 @@ export default function ConverseScreen() {
     setMessages((prev) => [...prev, { role: "ace", text: ackMsg }]);
     await speak(ackMsg);
 
-    // Navigate to journey detail (would pass booking ID in real flow)
     router.push("/(main)/journey");
   }, [router]);
 
@@ -258,7 +425,7 @@ export default function ConverseScreen() {
     }
   }, [isListening, stopListeningAndProcess, handleUserUtterance, startListening]);
 
-  // ─── Auto-start on mount (no gate) ──────────────────────────────────────────
+  // ─── Auto-start on mount ─────────────────────────────────────────────────────
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -303,6 +470,21 @@ export default function ConverseScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Ace</Text>
+        <TouchableOpacity
+          style={styles.settingsBtn}
+          onPress={() => router.push("/(main)/settings")}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Text style={styles.settingsIcon}>⚙️</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Offline banner */}
+      {isOffline && <OfflineBanner lastJourneyLabel={lastJourneyLabel} />}
+
       {/* Message thread */}
       <ScrollView
         ref={scrollRef}
@@ -328,32 +510,34 @@ export default function ConverseScreen() {
             <ActivityIndicator size="small" color="#003580" />
           </View>
         )}
+        {hasError && !isProcessing && (
+          <InlineError onRetry={handleRetry} />
+        )}
       </ScrollView>
 
       {/* Active journey status strip */}
       {journeyStripLabel && (
-        <Pressable
-          style={[
-            styles.journeyStrip,
-            currentLeg?.status === "delayed" && styles.journeyStripDelayed,
-            currentLeg?.status === "cancelled" && styles.journeyStripCancelled,
-          ]}
+        <JourneyStrip
+          label={journeyStripLabel}
+          delayed={currentLeg?.status === "delayed"}
+          cancelled={currentLeg?.status === "cancelled"}
           onPress={() => router.push("/(main)/journey")}
-        >
-          <Text style={styles.journeyStripText}>{journeyStripLabel}</Text>
-          <Text style={styles.journeyStripChevron}>›</Text>
-        </Pressable>
+        />
       )}
 
-      {/* Phase 2 confirmation buttons */}
+      {/* Phase 2 confirmation buttons — staggered fade-in */}
       {phase === 2 && pendingIntent && (
         <View style={styles.confirmRow}>
-          <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
-            <Text style={styles.cancelBtnText}>Cancel</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
-            <Text style={styles.confirmBtnText}>Confirm Booking</Text>
-          </TouchableOpacity>
+          <FadeInView delay={0}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
+              <Text style={styles.cancelBtnText}>Cancel</Text>
+            </TouchableOpacity>
+          </FadeInView>
+          <FadeInView delay={80}>
+            <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
+              <Text style={styles.confirmBtnText}>Confirm Booking</Text>
+            </TouchableOpacity>
+          </FadeInView>
         </View>
       )}
 
@@ -365,13 +549,21 @@ export default function ConverseScreen() {
           ) : isListening ? (
             <Text style={styles.listeningHint}>Listening…</Text>
           ) : null}
-          <TouchableOpacity
-            style={[styles.micBtn, isListening && styles.micBtnActive]}
-            onPress={handleMicPress}
-            disabled={isProcessing}
-          >
-            <Text style={styles.micIcon}>{isListening ? "⏹" : "🎤"}</Text>
-          </TouchableOpacity>
+
+          {/* Voice orb with rings */}
+          <View style={styles.orbWrap}>
+            <PulseRing delay={0} active={isListening} />
+            <PulseRing delay={300} active={isListening} />
+            <Animated.View style={[styles.micBtnWrap, orbPulseStyle]}>
+              <TouchableOpacity
+                style={[styles.micBtn, isListening && styles.micBtnActive]}
+                onPress={handleMicPress}
+                disabled={isProcessing}
+              >
+                <Text style={styles.micIcon}>{isListening ? "⏹" : "🎤"}</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
         </View>
       )}
     </View>
@@ -384,6 +576,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f9fc",
+    paddingTop: Platform.OS === "ios" ? 56 : 24,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 8,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#003580",
+    letterSpacing: 0.3,
+  },
+  settingsBtn: {
+    padding: 4,
+  },
+  settingsIcon: {
+    fontSize: 22,
   },
   messages: {
     flex: 1,
@@ -420,6 +632,53 @@ const styles = StyleSheet.create({
     color: "#0d1117",
     fontSize: 15,
     lineHeight: 21,
+  },
+  // Inline error
+  inlineError: {
+    alignSelf: "flex-start",
+    backgroundColor: "#fff5f5",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#fcc",
+    maxWidth: "85%",
+    gap: 8,
+  },
+  inlineErrorText: {
+    color: "#b00",
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  retryBtn: {
+    alignSelf: "flex-start",
+    backgroundColor: "#003580",
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+  },
+  retryBtnText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 13,
+  },
+  // Offline banner
+  offlineBanner: {
+    backgroundColor: "#fffbea",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e6d87e",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    gap: 2,
+  },
+  offlineText: {
+    fontSize: 13,
+    color: "#7a6500",
+    fontWeight: "600",
+  },
+  offlineJourney: {
+    fontSize: 12,
+    color: "#9a8200",
   },
   // Journey status strip
   journeyStrip: {
@@ -503,6 +762,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#7b8299",
     marginBottom: 8,
+  },
+  orbWrap: {
+    width: 120,
+    height: 120,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pulseRing: {
+    position: "absolute",
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 2,
+    borderColor: "#003580",
+  },
+  micBtnWrap: {
+    zIndex: 2,
   },
   micBtn: {
     width: 72,

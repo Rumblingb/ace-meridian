@@ -11,6 +11,8 @@ export default function MainLayout() {
     >
       <Stack.Screen name="converse" options={{ title: "Ace", headerShown: false }} />
       <Stack.Screen name="journey" options={{ title: "Your Journey" }} />
+      <Stack.Screen name="settings" options={{ title: "Settings" }} />
+      <Stack.Screen name="trips" options={{ title: "Trips" }} />
     </Stack>
   );
 }
