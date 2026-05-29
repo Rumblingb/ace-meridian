@@ -49,6 +49,9 @@ const CONFIRMATION_WORDS = ["yes", "yeah", "book", "confirm", "go", "do it", "so
 const CANCEL_WORDS = ["no", "cancel", "stop", "wait", "actually", "hold on", "nope", "don't", "nevermind"];
 const VOICE_LISTEN_DURATION_MS = 8000;
 
+const wordMatch = (words: string[], transcript: string) =>
+  words.some(w => new RegExp(`\\b${w}\\b`, 'i').test(transcript));
+
 // ─── Retry helper ─────────────────────────────────────────────────────────────
 
 async function fetchWithRetry(
@@ -287,7 +290,12 @@ export default function ConverseScreen() {
 
   const startListening = useCallback(async () => {
     const granted = await requestMicPermission();
-    if (!granted) return;
+    if (!granted) {
+      const msg = "Microphone permission is required. Please enable it in your device settings.";
+      setMessages(prev => [...prev, { role: "ace", text: msg }]);
+      await speak(msg);
+      return;
+    }
 
     try {
       await Audio.setAudioModeAsync({
@@ -341,11 +349,38 @@ export default function ConverseScreen() {
     }
   }, []);
 
+  // ─── Phase 2: voice confirmation listen ─────────────────────────────────────
+
+  const startVoiceConfirmListen = useCallback(async () => {
+    await startListening();
+
+    voiceListenTimerRef.current = setTimeout(async () => {
+      const text = await stopListeningAndProcess();
+      if (!text) return;
+
+      const lower = text.toLowerCase();
+      const confirmed = wordMatch(CONFIRMATION_WORDS, lower);
+      const cancelled = wordMatch(CANCEL_WORDS, lower);
+
+      if (confirmed) {
+        handleConfirm();
+      } else if (cancelled) {
+        handleCancel();
+      }
+    }, VOICE_LISTEN_DURATION_MS);
+  }, [startListening, stopListeningAndProcess]);
+
   // ─── Phase 1: process user utterance ────────────────────────────────────────
 
   const handleUserUtterance = useCallback(
     async (userText: string) => {
-      if (!userText) return;
+      if (!userText || !userText.trim()) {
+        const retry = "I didn't catch that — could you say that again?";
+        setMessages(prev => [...prev, { role: "ace", text: retry }]);
+        await speak(retry);
+        await startListening();
+        return;
+      }
 
       setHasError(false);
       setLastUserText(userText);
@@ -364,9 +399,10 @@ export default function ConverseScreen() {
 
         const intent: IntentResult = await response.json();
 
-        const confirmMsg = intent.price
-          ? `I found ${intent.summary}. The price is ${intent.price}. Shall I go ahead and book this for you?`
-          : `Here's what I found: ${intent.summary}. Want me to confirm this?`;
+        const priceText = intent.price?.trim()
+          ? `The total is ${intent.price}. `
+          : "";
+        const confirmMsg = `${intent.summary}. ${priceText}Shall I go ahead and book this?`;
 
         setMessages((prev) => [...prev, { role: "ace", text: confirmMsg }]);
         setPendingIntent(intent);
@@ -385,7 +421,7 @@ export default function ConverseScreen() {
         setIsProcessing(false);
       }
     },
-    [startListening]
+    [startListening, startVoiceConfirmListen]
   );
 
   const handleRetry = useCallback(() => {
@@ -393,27 +429,6 @@ export default function ConverseScreen() {
       void handleUserUtterance(lastUserText);
     }
   }, [lastUserText, handleUserUtterance]);
-
-  // ─── Phase 2: voice confirmation listen ─────────────────────────────────────
-
-  const startVoiceConfirmListen = useCallback(async () => {
-    await startListening();
-
-    voiceListenTimerRef.current = setTimeout(async () => {
-      const text = await stopListeningAndProcess();
-      if (!text) return;
-
-      const lower = text.toLowerCase();
-      const confirmed = CONFIRMATION_WORDS.some((w) => lower.includes(w));
-      const cancelled = CANCEL_WORDS.some((w) => lower.includes(w));
-
-      if (confirmed) {
-        handleConfirm();
-      } else if (cancelled) {
-        handleCancel();
-      }
-    }, VOICE_LISTEN_DURATION_MS);
-  }, [startListening, stopListeningAndProcess]);
 
   // ─── Confirm booking ────────────────────────────────────────────────────────
 
@@ -489,12 +504,16 @@ export default function ConverseScreen() {
   // ─── Auto-start on mount ─────────────────────────────────────────────────────
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      startListening();
-    }, 1200);
+    let cancelled = false;
+    (async () => {
+      const greeting = "Hello! I'm Ace. Where would you like to travel?";
+      setMessages([{ role: "ace", text: greeting }]);
+      await speak(greeting);
+      if (!cancelled) await startListening();
+    })();
 
     return () => {
-      clearTimeout(timer);
+      cancelled = true;
       if (voiceListenTimerRef.current) clearTimeout(voiceListenTimerRef.current);
       if (recordingRef.current) {
         recordingRef.current.stopAndUnloadAsync().catch(() => {});

@@ -80,18 +80,24 @@ export async function speak(text: string): Promise<void> {
     );
     currentSound = sound;
 
-    await new Promise<void>((resolve) => {
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.didJustFinish) {
-          resolve();
-        }
-      });
-    });
+    await Promise.race([
+      new Promise<void>((resolve) => {
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) resolve();
+        });
+      }),
+      new Promise<void>((resolve) => setTimeout(resolve, 30_000)),
+    ]);
 
     await sound.unloadAsync();
     currentSound = null;
-  } catch (err) {
-    console.warn("[TTS] ElevenLabs failed, falling back to system voice:", err);
-    await systemVoiceFallback(text);
+  } catch (elevenLabsErr) {
+    console.warn("[TTS] ElevenLabs failed:", elevenLabsErr);
+    try {
+      await systemVoiceFallback(text);
+    } catch (sysErr) {
+      console.error("[TTS] Both TTS backends failed:", sysErr);
+      throw sysErr;
+    }
   }
 }
