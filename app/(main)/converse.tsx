@@ -22,6 +22,7 @@ import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { Audio } from "expo-av";
 import { speak, stopSpeaking } from "../../lib/tts";
+import { appendJourneyHistory, loadJourneyHistory } from "../../lib/storage";
 import { useJourneyStore } from "../../store/journeyStore";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -211,6 +212,31 @@ function InlineError({ onRetry }: { onRetry: () => void }) {
   );
 }
 
+// ─── Journey strip skeleton ───────────────────────────────────────────────────
+
+function JourneyStripSkeleton() {
+  const opacity = useSharedValue(0.4);
+
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 700 }),
+        withTiming(0.4, { duration: 700 })
+      ),
+      -1,
+      false
+    );
+  }, []);
+
+  const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return (
+    <Animated.View style={[styles.journeyStripSkeleton, animStyle]}>
+      <View style={styles.skeletonBar} />
+    </Animated.View>
+  );
+}
+
 // ─── Offline banner ────────────────────────────────────────────────────────────
 
 function OfflineBanner({ lastJourneyLabel }: { lastJourneyLabel: string | null }) {
@@ -242,6 +268,7 @@ export default function ConverseScreen() {
   const [lastUserText, setLastUserText] = useState("");
   const [isOffline, setIsOffline] = useState(false);
   const [lastJourneyLabel, setLastJourneyLabel] = useState<string | null>(null);
+  const [journeyStripLoading, setJourneyStripLoading] = useState(true);
 
   const recordingRef = useRef<Audio.Recording | null>(null);
   const voiceListenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -350,6 +377,10 @@ export default function ConverseScreen() {
       } catch (err) {
         console.warn("[converse] Intent fetch failed after retries:", err);
         setHasError(true);
+        // Heuristic: TypeError = network failure (no connection)
+        if (err instanceof TypeError && (err.message.includes("Network") || err.message.includes("fetch"))) {
+          setIsOffline(true);
+        }
       } finally {
         setIsProcessing(false);
       }
@@ -389,15 +420,31 @@ export default function ConverseScreen() {
   const handleConfirm = useCallback(async () => {
     if (voiceListenTimerRef.current) clearTimeout(voiceListenTimerRef.current);
     await stopSpeaking();
+
+    // Persist to local journey history before navigating
+    if (pendingIntent) {
+      const label = pendingIntent.price
+        ? `${pendingIntent.summary} · ${pendingIntent.price}`
+        : pendingIntent.summary;
+      void appendJourneyHistory({
+        label,
+        summary: pendingIntent.summary,
+        price: pendingIntent.price,
+        bookedAt: new Date().toISOString(),
+      });
+      setLastJourneyLabel(label);
+    }
+
     setPendingIntent(null);
     setPhase(1);
+    setIsOffline(false);
 
     const ackMsg = "Booking confirmed! Your journey details are ready.";
     setMessages((prev) => [...prev, { role: "ace", text: ackMsg }]);
     await speak(ackMsg);
 
     router.push("/(main)/journey");
-  }, [router]);
+  }, [router, pendingIntent]);
 
   // ─── Cancel back to Phase 1 ─────────────────────────────────────────────────
 
@@ -424,6 +471,20 @@ export default function ConverseScreen() {
       await startListening();
     }
   }, [isListening, stopListeningAndProcess, handleUserUtterance, startListening]);
+
+  // ─── Load last journey + resolve strip loading ───────────────────────────────
+
+  useEffect(() => {
+    loadJourneyHistory().then((history) => {
+      if (history.length > 0) {
+        const latest = history[0] as Record<string, unknown>;
+        const label = typeof latest.label === "string" ? latest.label : null;
+        if (label) setLastJourneyLabel(label);
+      }
+      // Journey strip is considered "loaded" once local history check completes
+      setJourneyStripLoading(false);
+    });
+  }, []);
 
   // ─── Auto-start on mount ─────────────────────────────────────────────────────
 
@@ -515,15 +576,17 @@ export default function ConverseScreen() {
         )}
       </ScrollView>
 
-      {/* Active journey status strip */}
-      {journeyStripLabel && (
+      {/* Journey strip: skeleton while loading, real strip when ready */}
+      {journeyStripLoading ? (
+        <JourneyStripSkeleton />
+      ) : journeyStripLabel ? (
         <JourneyStrip
           label={journeyStripLabel}
           delayed={currentLeg?.status === "delayed"}
           cancelled={currentLeg?.status === "cancelled"}
           onPress={() => router.push("/(main)/journey")}
         />
-      )}
+      ) : null}
 
       {/* Phase 2 confirmation buttons — staggered fade-in */}
       {phase === 2 && pendingIntent && (
@@ -679,6 +742,20 @@ const styles = StyleSheet.create({
   offlineJourney: {
     fontSize: 12,
     color: "#9a8200",
+  },
+  // Journey strip skeleton
+  journeyStripSkeleton: {
+    backgroundColor: "#f0f2f8",
+    borderTopWidth: 1,
+    borderTopColor: "#e5e8ef",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  skeletonBar: {
+    height: 14,
+    width: "60%",
+    borderRadius: 7,
+    backgroundColor: "#d8dce8",
   },
   // Journey status strip
   journeyStrip: {
