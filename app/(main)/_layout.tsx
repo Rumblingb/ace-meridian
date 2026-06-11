@@ -4,8 +4,8 @@ export default function MainLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: "#003580" },
-        headerTintColor: "#ffffff",
+        headerStyle: { backgroundColor: "#FFB020" },
+        headerTintColor: "#0B0F14",
         headerTitleStyle: { fontWeight: "700" },
       }}
     >

@@ -53,12 +53,12 @@ export default function JourneyScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8f9fc" },
+  container: { flex: 1, backgroundColor: "#121821" },
   content: { padding: 16, gap: 12 },
   empty: { flex: 1, alignItems: "center", justifyContent: "center" },
-  emptyText: { color: "#7b8299", fontSize: 16 },
+  emptyText: { color: "#8A8F98", fontSize: 16 },
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#0B0F14",
     borderRadius: 12,
     padding: 16,
     shadowColor: "#000",
@@ -69,12 +69,12 @@ const styles = StyleSheet.create({
   },
   cardActive: {
     borderLeftWidth: 4,
-    borderLeftColor: "#003580",
+    borderLeftColor: "#FFB020",
   },
-  service: { fontSize: 16, fontWeight: "700", color: "#0d1117", marginBottom: 4 },
+  service: { fontSize: 16, fontWeight: "700", color: "#F2EEE3", marginBottom: 4 },
   route: { fontSize: 14, color: "#3b4154", marginBottom: 4 },
-  time: { fontSize: 13, color: "#7b8299", marginBottom: 4 },
-  platform: { fontSize: 13, fontWeight: "600", color: "#003580", marginBottom: 4 },
+  time: { fontSize: 13, color: "#8A8F98", marginBottom: 4 },
+  platform: { fontSize: 13, fontWeight: "600", color: "#FFB020", marginBottom: 4 },
   status: { fontSize: 13, fontWeight: "600", color: "#007a3d" },
   statusDelayed: { color: "#b45309" },
   statusCancelled: { color: "#e53e3e" },

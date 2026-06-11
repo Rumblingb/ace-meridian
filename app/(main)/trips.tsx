@@ -66,17 +66,17 @@ export default function TripsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8f9fc" },
+  container: { flex: 1, backgroundColor: "#121821" },
   content: { padding: 16, gap: 12 },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#0d1117",
+    color: "#F2EEE3",
     marginBottom: 4,
   },
   emptyContainer: {
     flex: 1,
-    backgroundColor: "#f8f9fc",
+    backgroundColor: "#121821",
     alignItems: "center",
     justifyContent: "center",
     padding: 32,
@@ -85,29 +85,29 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#0d1117",
+    color: "#F2EEE3",
     textAlign: "center",
   },
   emptySub: {
     fontSize: 15,
-    color: "#7b8299",
+    color: "#8A8F98",
     textAlign: "center",
     lineHeight: 22,
   },
   ctaBtn: {
     marginTop: 8,
-    backgroundColor: "#003580",
+    backgroundColor: "#FFB020",
     borderRadius: 12,
     paddingHorizontal: 28,
     paddingVertical: 14,
   },
   ctaBtnText: {
-    color: "#ffffff",
+    color: "#0B0F14",
     fontWeight: "700",
     fontSize: 16,
   },
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#0B0F14",
     borderRadius: 12,
     padding: 16,
     shadowColor: "#000",
@@ -118,12 +118,12 @@ const styles = StyleSheet.create({
   },
   cardActive: {
     borderLeftWidth: 4,
-    borderLeftColor: "#003580",
+    borderLeftColor: "#FFB020",
   },
-  service: { fontSize: 16, fontWeight: "700", color: "#0d1117", marginBottom: 4 },
+  service: { fontSize: 16, fontWeight: "700", color: "#F2EEE3", marginBottom: 4 },
   route: { fontSize: 14, color: "#3b4154", marginBottom: 4 },
-  time: { fontSize: 13, color: "#7b8299", marginBottom: 4 },
-  platform: { fontSize: 13, fontWeight: "600", color: "#003580", marginBottom: 4 },
+  time: { fontSize: 13, color: "#8A8F98", marginBottom: 4 },
+  platform: { fontSize: 13, fontWeight: "600", color: "#FFB020", marginBottom: 4 },
   status: { fontSize: 13, fontWeight: "600", color: "#007a3d" },
   statusDelayed: { color: "#b45309" },
   statusCancelled: { color: "#e53e3e" },

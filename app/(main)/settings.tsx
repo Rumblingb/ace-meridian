@@ -150,7 +150,7 @@ export default function SettingsScreen() {
           <Switch
             value={prefs.notifyJourneyAlerts}
             onValueChange={(v) => update("notifyJourneyAlerts", v)}
-            trackColor={{ true: "#003580" }}
+            trackColor={{ true: "#FFB020" }}
           />
         </Row>
         <View style={styles.divider} />
@@ -159,7 +159,7 @@ export default function SettingsScreen() {
           <Switch
             value={prefs.notifyDelays}
             onValueChange={(v) => update("notifyDelays", v)}
-            trackColor={{ true: "#003580" }}
+            trackColor={{ true: "#FFB020" }}
           />
         </Row>
         <View style={styles.divider} />
@@ -168,7 +168,7 @@ export default function SettingsScreen() {
           <Switch
             value={prefs.notifyBookingConfirmations}
             onValueChange={(v) => update("notifyBookingConfirmations", v)}
-            trackColor={{ true: "#003580" }}
+            trackColor={{ true: "#FFB020" }}
           />
         </Row>
       </View>
@@ -242,7 +242,7 @@ export default function SettingsScreen() {
           <Switch
             value={prefs.autoListenOnOpen}
             onValueChange={(v) => update("autoListenOnOpen", v)}
-            trackColor={{ true: "#003580" }}
+            trackColor={{ true: "#FFB020" }}
           />
         </Row>
       </View>
@@ -277,7 +277,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fc",
+    backgroundColor: "#121821",
   },
   content: {
     padding: 16,
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   sectionHeader: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#7b8299",
+    color: "#8A8F98",
     letterSpacing: 0.8,
     textTransform: "uppercase",
     marginTop: 24,
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#0B0F14",
     borderRadius: 12,
     overflow: "hidden",
     shadowColor: "#000",
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: "#e5e8ef",
+    backgroundColor: "#1C242F",
     marginHorizontal: 16,
   },
   row: {
@@ -317,19 +317,19 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: 15,
-    color: "#0d1117",
+    color: "#F2EEE3",
     flex: 1,
   },
   input: {
     flex: 1,
     fontSize: 15,
-    color: "#0d1117",
+    color: "#F2EEE3",
     textAlign: "right",
     paddingVertical: 0,
   },
   mutedValue: {
     fontSize: 15,
-    color: "#7b8299",
+    color: "#8A8F98",
   },
   linkRow: {
     flexDirection: "row",
@@ -341,11 +341,11 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 15,
-    color: "#003580",
+    color: "#FFB020",
   },
   chevron: {
     fontSize: 20,
-    color: "#c0c8d8",
+    color: "#2A3340",
     lineHeight: 22,
   },
   marketRow: {
@@ -360,14 +360,14 @@ const styles = StyleSheet.create({
   },
   pill: {
     borderWidth: 1,
-    borderColor: "#c0c8d8",
+    borderColor: "#2A3340",
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 6,
   },
   pillActive: {
-    backgroundColor: "#003580",
-    borderColor: "#003580",
+    backgroundColor: "#FFB020",
+    borderColor: "#FFB020",
   },
   pillText: {
     fontSize: 13,
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
     color: "#3b4154",
   },
   pillTextActive: {
-    color: "#ffffff",
+    color: "#0B0F14",
   },
   speedSection: {
     paddingTop: 4,
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   speedValue: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#003580",
+    color: "#FFB020",
   },
   speedStops: {
     flexDirection: "row",
@@ -401,15 +401,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f2f8",
   },
   speedStopActive: {
-    backgroundColor: "#003580",
+    backgroundColor: "#FFB020",
   },
   speedStopText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#7b8299",
+    color: "#8A8F98",
   },
   speedStopTextActive: {
-    color: "#ffffff",
+    color: "#0B0F14",
   },
   signOutBtn: {
     marginTop: 32,

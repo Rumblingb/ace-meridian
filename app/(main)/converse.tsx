@@ -587,7 +587,7 @@ export default function ConverseScreen() {
         ))}
         {isProcessing && (
           <View style={[styles.bubble, styles.bubbleAce]}>
-            <ActivityIndicator size="small" color="#003580" />
+            <ActivityIndicator size="small" color="#FFB020" />
           </View>
         )}
         {hasError && !isProcessing && (
@@ -657,7 +657,7 @@ export default function ConverseScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fc",
+    backgroundColor: "#121821",
     paddingTop: Platform.OS === "ios" ? 56 : 24,
   },
   header: {
@@ -670,7 +670,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: "800",
-    color: "#003580",
+    color: "#FFB020",
     letterSpacing: 0.3,
   },
   settingsBtn: {
@@ -694,11 +694,11 @@ const styles = StyleSheet.create({
   },
   bubbleUser: {
     alignSelf: "flex-end",
-    backgroundColor: "#003580",
+    backgroundColor: "#FFB020",
   },
   bubbleAce: {
     alignSelf: "flex-start",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#0B0F14",
     shadowColor: "#000",
     shadowOpacity: 0.06,
     shadowOffset: { width: 0, height: 1 },
@@ -706,12 +706,12 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   bubbleUserText: {
-    color: "#ffffff",
+    color: "#0B0F14",
     fontSize: 15,
     lineHeight: 21,
   },
   bubbleAceText: {
-    color: "#0d1117",
+    color: "#F2EEE3",
     fontSize: 15,
     lineHeight: 21,
   },
@@ -734,19 +734,19 @@ const styles = StyleSheet.create({
   },
   retryBtn: {
     alignSelf: "flex-start",
-    backgroundColor: "#003580",
+    backgroundColor: "#FFB020",
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 7,
   },
   retryBtnText: {
-    color: "#fff",
+    color: "#0B0F14",
     fontWeight: "700",
     fontSize: 13,
   },
   // Offline banner
   offlineBanner: {
-    backgroundColor: "#fffbea",
+    backgroundColor: "#121821ea",
     borderBottomWidth: 1,
     borderBottomColor: "#e6d87e",
     paddingHorizontal: 16,
@@ -766,7 +766,7 @@ const styles = StyleSheet.create({
   journeyStripSkeleton: {
     backgroundColor: "#f0f2f8",
     borderTopWidth: 1,
-    borderTopColor: "#e5e8ef",
+    borderTopColor: "#1C242F",
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
@@ -809,14 +809,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     padding: 16,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#0B0F14",
     borderTopWidth: 1,
-    borderTopColor: "#e5e8ef",
+    borderTopColor: "#1C242F",
   },
   cancelBtn: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#e5e8ef",
+    borderColor: "#1C242F",
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
@@ -828,13 +828,13 @@ const styles = StyleSheet.create({
   },
   confirmBtn: {
     flex: 2,
-    backgroundColor: "#003580",
+    backgroundColor: "#FFB020",
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
   },
   confirmBtnText: {
-    color: "#ffffff",
+    color: "#0B0F14",
     fontWeight: "700",
     fontSize: 15,
   },
@@ -843,9 +843,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingBottom: 36,
     paddingTop: 12,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#0B0F14",
     borderTopWidth: 1,
-    borderTopColor: "#e5e8ef",
+    borderTopColor: "#1C242F",
   },
   transcriptText: {
     fontSize: 14,
@@ -856,7 +856,7 @@ const styles = StyleSheet.create({
   },
   listeningHint: {
     fontSize: 13,
-    color: "#7b8299",
+    color: "#8A8F98",
     marginBottom: 8,
   },
   orbWrap: {
@@ -871,7 +871,7 @@ const styles = StyleSheet.create({
     height: 72,
     borderRadius: 36,
     borderWidth: 2,
-    borderColor: "#003580",
+    borderColor: "#FFB020",
   },
   micBtnWrap: {
     zIndex: 2,
@@ -880,10 +880,10 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "#003580",
+    backgroundColor: "#FFB020",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#003580",
+    shadowColor: "#FFB020",
     shadowOpacity: 0.4,
     shadowOffset: { width: 0, height: 4 },
     shadowRadius: 12,
