@@ -105,7 +105,7 @@ export default function SettingsScreen() {
             value={prefs.name}
             onChangeText={(v) => update("name", v)}
             placeholder="Your name"
-            placeholderTextColor="#aab"
+            placeholderTextColor="#5F6671"
             returnKeyType="done"
           />
         </Row>
@@ -117,7 +117,7 @@ export default function SettingsScreen() {
             value={prefs.email}
             onChangeText={(v) => update("email", v)}
             placeholder="you@example.com"
-            placeholderTextColor="#aab"
+            placeholderTextColor="#5F6671"
             keyboardType="email-address"
             autoCapitalize="none"
             returnKeyType="done"
@@ -192,7 +192,7 @@ export default function SettingsScreen() {
             )
           }
         >
-          <Text style={[styles.linkText, { color: "#e53e3e" }]}>Request data deletion</Text>
+          <Text style={[styles.linkText, { color: "#FF7A6B" }]}>Request data deletion</Text>
           <Text style={styles.chevron}>›</Text>
         </TouchableOpacity>
       </View>
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   pillText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#3b4154",
+    color: "#8A8F98",
   },
   pillTextActive: {
     color: "#0B0F14",
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 8,
     borderRadius: 8,
-    backgroundColor: "#f0f2f8",
+    backgroundColor: "#1C242F",
   },
   speedStopActive: {
     backgroundColor: "#FFB020",
@@ -413,15 +413,15 @@ const styles = StyleSheet.create({
   },
   signOutBtn: {
     marginTop: 32,
-    backgroundColor: "#fff0f0",
+    backgroundColor: "#2A1416",
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ffc5c5",
+    borderColor: "#5C2E33",
   },
   signOutText: {
-    color: "#e53e3e",
+    color: "#FF7A6B",
     fontWeight: "700",
     fontSize: 16,
   },

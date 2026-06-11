@@ -72,10 +72,10 @@ const styles = StyleSheet.create({
     borderLeftColor: "#FFB020",
   },
   service: { fontSize: 16, fontWeight: "700", color: "#F2EEE3", marginBottom: 4 },
-  route: { fontSize: 14, color: "#3b4154", marginBottom: 4 },
+  route: { fontSize: 14, color: "#A9AFB8", marginBottom: 4 },
   time: { fontSize: 13, color: "#8A8F98", marginBottom: 4 },
   platform: { fontSize: 13, fontWeight: "600", color: "#FFB020", marginBottom: 4 },
-  status: { fontSize: 13, fontWeight: "600", color: "#007a3d" },
-  statusDelayed: { color: "#b45309" },
+  status: { fontSize: 13, fontWeight: "600", color: "#5BBE7E" },
+  statusDelayed: { color: "#E8B54A" },
   statusCancelled: { color: "#e53e3e" },
 });

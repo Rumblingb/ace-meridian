@@ -698,12 +698,9 @@ const styles = StyleSheet.create({
   },
   bubbleAce: {
     alignSelf: "flex-start",
-    backgroundColor: "#0B0F14",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: "#121821",
+    borderWidth: 1,
+    borderColor: "#1C242F",
   },
   bubbleUserText: {
     color: "#0B0F14",
@@ -718,17 +715,17 @@ const styles = StyleSheet.create({
   // Inline error
   inlineError: {
     alignSelf: "flex-start",
-    backgroundColor: "#fff5f5",
+    backgroundColor: "#2A1416",
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: "#fcc",
+    borderColor: "#5C2E33",
     maxWidth: "85%",
     gap: 8,
   },
   inlineErrorText: {
-    color: "#b00",
+    color: "#FF7A6B",
     fontSize: 14,
     lineHeight: 20,
   },
@@ -748,23 +745,23 @@ const styles = StyleSheet.create({
   offlineBanner: {
     backgroundColor: "#121821ea",
     borderBottomWidth: 1,
-    borderBottomColor: "#e6d87e",
+    borderBottomColor: "#6B5418",
     paddingHorizontal: 16,
     paddingVertical: 10,
     gap: 2,
   },
   offlineText: {
     fontSize: 13,
-    color: "#7a6500",
+    color: "#E8B54A",
     fontWeight: "600",
   },
   offlineJourney: {
     fontSize: 12,
-    color: "#9a8200",
+    color: "#B89B4D",
   },
   // Journey strip skeleton
   journeyStripSkeleton: {
-    backgroundColor: "#f0f2f8",
+    backgroundColor: "#121821",
     borderTopWidth: 1,
     borderTopColor: "#1C242F",
     paddingHorizontal: 16,
@@ -774,35 +771,35 @@ const styles = StyleSheet.create({
     height: 14,
     width: "60%",
     borderRadius: 7,
-    backgroundColor: "#d8dce8",
+    backgroundColor: "#1C242F",
   },
   // Journey status strip
   journeyStrip: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#e8f4ea",
+    backgroundColor: "#13211A",
     borderTopWidth: 1,
-    borderTopColor: "#c3e0c8",
+    borderTopColor: "#2E4A38",
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
   journeyStripDelayed: {
-    backgroundColor: "#fff3cd",
-    borderTopColor: "#ffc107",
+    backgroundColor: "#241C0B",
+    borderTopColor: "#6B5418",
   },
   journeyStripCancelled: {
-    backgroundColor: "#fde8e8",
-    borderTopColor: "#e53e3e",
+    backgroundColor: "#2A1416",
+    borderTopColor: "#5C2E33",
   },
   journeyStripText: {
     flex: 1,
     fontSize: 13,
     fontWeight: "600",
-    color: "#1a3a1a",
+    color: "#F2EEE3",
   },
   journeyStripChevron: {
     fontSize: 18,
-    color: "#4a7c59",
+    color: "#8A8F98",
   },
   // Confirmation row
   confirmRow: {
@@ -822,7 +819,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelBtnText: {
-    color: "#3b4154",
+    color: "#C9CDD4",
     fontWeight: "600",
     fontSize: 15,
   },
@@ -849,7 +846,7 @@ const styles = StyleSheet.create({
   },
   transcriptText: {
     fontSize: 14,
-    color: "#3b4154",
+    color: "#8A8F98",
     marginBottom: 8,
     paddingHorizontal: 16,
     textAlign: "center",
