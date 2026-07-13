@@ -12,7 +12,7 @@
     "@react-native-async-storage/async-storage": "1.23.1",
     "expo": "~51.0.0",
     "expo-av": "~14.0.6",
-    "expo-constants": "~16.0.0",
+    "expo-constants": "~57.0.3",
     "expo-haptics": "~13.0.1",
     "expo-linking": "~6.3.0",
     "expo-router": "~3.5.16",
